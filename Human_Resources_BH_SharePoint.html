@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Human Resources – IOP Operations Hub</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f5; color: #323130; font-size: 14px; overflow-x: hidden; }
+.app-rail { position: fixed; left: 0; top: 0; bottom: 0; width: 48px; background: #1b1b1b; z-index: 1000; display: flex; flex-direction: column; align-items: center; padding-top: 12px; }
+.app-rail-icon { width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-bottom: 4px; color: #fff; transition: background 0.15s; }
+.app-rail-icon:hover { background: rgba(255,255,255,0.12); }
+.app-rail-icon.active { background: rgba(255,255,255,0.15); }
+.app-rail-icon svg { width: 20px; height: 20px; fill: currentColor; }
+.waffle-icon { font-size: 18px; color: #fff; }
+.app-rail-divider { width: 24px; height: 1px; background: rgba(255,255,255,0.2); margin: 8px 0; }
+.suite-bar { position: fixed; top: 0; left: 48px; right: 0; height: 48px; background: #1a7a7a; z-index: 999; display: flex; align-items: center; padding: 0 16px; justify-content: space-between; }
+.suite-bar-left { display: flex; align-items: center; gap: 16px; }
+.suite-bar-title { color: #fff; font-size: 15px; font-weight: 600; }
+.suite-search { background: rgba(255,255,255,0.15); border: none; border-radius: 4px; padding: 6px 12px 6px 32px; color: #fff; width: 340px; font-size: 13px; outline: none; }
+.suite-search::placeholder { color: rgba(255,255,255,0.7); }
+.suite-search-wrap { position: relative; }
+.suite-search-wrap svg { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; fill: rgba(255,255,255,0.7); }
+.suite-bar-right { display: flex; align-items: center; gap: 8px; }
+.suite-icon-btn { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; border: none; background: none; }
+.suite-icon-btn:hover { background: rgba(255,255,255,0.15); }
+.suite-icon-btn svg { width: 18px; height: 18px; fill: currentColor; }
+.user-avatar { width: 32px; height: 32px; border-radius: 50%; background: #0e5c5c; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; cursor: pointer; }
+.main-wrap { margin-left: 48px; margin-top: 48px; }
+
+.site-header { background: linear-gradient(135deg, #7b2d5f 0%, #5e2248 60%, #4a1a39 100%); padding: 24px 40px 20px; position: relative; overflow: hidden; }
+.site-header::before { content: ''; position: absolute; top: -40px; right: -40px; width: 300px; height: 300px; background: rgba(255,255,255,0.04); border-radius: 50%; }
+.site-header::after { content: ''; position: absolute; bottom: -60px; right: 120px; width: 200px; height: 200px; background: rgba(255,255,255,0.03); border-radius: 50%; }
+.site-header-inner { display: flex; align-items: center; gap: 16px; position: relative; z-index: 1; }
+.site-logo { width: 56px; height: 56px; border-radius: 8px; object-fit: contain; background: #000; padding: 4px; }
+.site-info h1 { color: #fff; font-size: 22px; font-weight: 700; }
+.site-info p { color: rgba(255,255,255,0.85); font-size: 13px; margin-top: 2px; }
+
+.hub-nav { background: #fff; border-bottom: 1px solid #edebe9; padding: 0 40px; display: flex; gap: 0; overflow-x: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.hub-nav a { padding: 12px 20px; font-size: 14px; color: #605e5c; text-decoration: none; border-bottom: 3px solid transparent; transition: all 0.15s; white-space: nowrap; font-weight: 500; }
+.hub-nav a:hover { color: #7b2d5f; background: #faf0f6; }
+.hub-nav a.active { color: #7b2d5f; border-bottom-color: #7b2d5f; font-weight: 600; }
+.sub-nav { background: #faf9f8; border-bottom: 1px solid #edebe9; padding: 0 40px; display: flex; gap: 0; }
+.sub-nav a { padding: 10px 18px; font-size: 13px; color: #605e5c; text-decoration: none; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap; font-weight: 500; }
+.sub-nav a:hover { color: #7b2d5f; }
+.sub-nav a.active { color: #7b2d5f; border-bottom-color: #7b2d5f; font-weight: 600; }
+
+.page-content { max-width: 1340px; margin: 0 auto; padding: 28px 40px 60px; }
+.breadcrumb { display: flex; align-items: center; gap: 6px; margin-bottom: 24px; font-size: 13px; }
+.breadcrumb a { color: #1a7a7a; text-decoration: none; }
+.breadcrumb a:hover { text-decoration: underline; }
+.breadcrumb span.sep { color: #a19f9d; }
+.breadcrumb span.current { color: #605e5c; }
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; margin-top: 36px; }
+.section-header:first-child { margin-top: 0; }
+.section-header h2 { font-size: 18px; font-weight: 600; color: #323130; }
+.section-header a { font-size: 13px; color: #7b2d5f; text-decoration: none; font-weight: 500; }
+.section-header a:hover { text-decoration: underline; }
+
+/* Alerts */
+.alert-banner { border-radius: 6px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.alert-banner-icon { font-size: 18px; }
+.alert-banner-text { font-size: 13px; color: #323130; flex: 1; }
+.alert-banner-text strong { font-weight: 600; }
+.alert-banner-action { font-size: 12px; cursor: pointer; font-weight: 600; white-space: nowrap; }
+.alert-yellow { background: #fff4ce; border: 1px solid #ffb900; }
+.alert-yellow .alert-banner-action { color: #7b2d5f; }
+.alert-red { background: #fde7e9; border: 1px solid #d13438; }
+.alert-red .alert-banner-action { color: #d13438; }
+.alert-blue { background: #e8f0fe; border: 1px solid #4a6fa5; }
+.alert-blue .alert-banner-action { color: #4a6fa5; }
+.alert-stack { margin-bottom: 24px; }
+
+/* KPI */
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.kpi-card { background: #fff; border-radius: 8px; padding: 20px; border: 1px solid #edebe9; transition: box-shadow 0.2s; }
+.kpi-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.kpi-label { font-size: 12px; color: #605e5c; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+.kpi-value { font-size: 28px; font-weight: 700; color: #7b2d5f; margin: 6px 0 4px; }
+.kpi-sub { font-size: 12px; color: #a19f9d; }
+.kpi-trend { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
+.kpi-trend.up { color: #107c10; background: #dff6dd; }
+.kpi-trend.down { color: #d13438; background: #fde7e9; }
+.kpi-trend.alert { color: #d83b01; background: #fed9cc; }
+.kpi-trend.neutral { color: #605e5c; background: #f3f2f1; }
+
+/* Progress bars */
+.progress-bar-wrap { margin-top: 10px; }
+.progress-label { font-size: 11px; color: #605e5c; display: flex; justify-content: space-between; margin-bottom: 3px; }
+.progress-bar { height: 8px; background: #edebe9; border-radius: 4px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 4px; }
+.fill-purple { background: linear-gradient(90deg, #7b2d5f, #5e2248); }
+.fill-green { background: linear-gradient(90deg, #107c10, #0b5e0b); }
+.fill-orange { background: linear-gradient(90deg, #d83b01, #a52e00); }
+.fill-blue { background: linear-gradient(90deg, #4a6fa5, #3a5a8a); }
+
+/* Roster Table */
+.roster-wrap { background: #fff; border: 1px solid #edebe9; border-radius: 8px; overflow: hidden; }
+.roster-table { width: 100%; border-collapse: collapse; }
+.roster-table th { text-align: left; padding: 10px 14px; background: #faf9f8; border-bottom: 1px solid #edebe9; font-size: 11px; font-weight: 600; color: #605e5c; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap; }
+.roster-table td { padding: 10px 14px; border-bottom: 1px solid #f3f2f1; font-size: 13px; color: #323130; }
+.roster-table tr:last-child td { border-bottom: none; }
+.roster-table tr:hover td { background: #faf0f6; cursor: pointer; }
+.roster-name { font-weight: 600; color: #323130; }
+.roster-role { color: #605e5c; }
+.license-type { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; display: inline-block; }
+.lic-lpc { background: #e8daef; color: #6b4c9a; }
+.lic-lisac { background: #d4f0ed; color: #1e7e72; }
+.lic-lcsw { background: #d4e1f5; color: #3a5a8a; }
+.lic-lac { background: #fff4ce; color: #986f0b; }
+.lic-bht { background: #f3f2f1; color: #605e5c; }
+.lic-peer { background: #fed9cc; color: #d83b01; }
+.lic-none { background: #f3f2f1; color: #a19f9d; }
+.status-badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; white-space: nowrap; }
+.status-open { background: #fde7e9; color: #d13438; }
+.status-progress { background: #fff4ce; color: #986f0b; }
+.status-closed { background: #dff6dd; color: #107c10; }
+.status-pending { background: #e8f0fe; color: #2b6cb0; }
+.status-expiring { background: #fed9cc; color: #d83b01; }
+.status-purple { background: #f0e0ec; color: #7b2d5f; }
+.status-restricted { background: #f3f2f1; color: #605e5c; }
+
+/* Credential Matrix */
+.cred-matrix { width: 100%; background: #fff; border: 1px solid #edebe9; border-radius: 8px; overflow: hidden; }
+.cred-matrix th { text-align: center; padding: 10px 8px; background: #faf9f8; border-bottom: 1px solid #edebe9; font-size: 11px; font-weight: 600; color: #605e5c; text-transform: uppercase; letter-spacing: 0.3px; }
+.cred-matrix th:first-child { text-align: left; padding-left: 14px; }
+.cred-matrix td { padding: 10px 8px; border-bottom: 1px solid #f3f2f1; font-size: 12px; color: #323130; text-align: center; }
+.cred-matrix td:first-child { text-align: left; padding-left: 14px; font-weight: 600; }
+.cred-matrix tr:last-child td { border-bottom: none; }
+.cred-matrix tr:hover td { background: #faf0f6; }
+.cred-dot { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; }
+.cred-current { background: #dff6dd; color: #107c10; }
+.cred-expiring { background: #fed9cc; color: #d83b01; }
+.cred-expired { background: #fde7e9; color: #d13438; }
+.cred-na { background: #f3f2f1; color: #a19f9d; }
+.cred-pending { background: #fff4ce; color: #986f0b; }
+
+/* Folders */
+.folder-container { border: 1px solid #edebe9; border-radius: 8px; overflow: hidden; background: #fff; margin-bottom: 12px; }
+.folder-header { display: grid; grid-template-columns: 40px 1fr 160px 130px 100px; padding: 12px 16px; background: #fff; border-bottom: 1px solid #edebe9; cursor: pointer; transition: background 0.1s; align-items: center; }
+.folder-header:hover { background: #faf0f6; }
+.doc-icon { font-size: 18px; }
+.doc-name { font-size: 13px; font-weight: 500; color: #7b2d5f; display: flex; align-items: center; gap: 6px; }
+.doc-modified { font-size: 12px; color: #a19f9d; }
+.doc-author { font-size: 12px; color: #605e5c; }
+.doc-type { font-size: 12px; color: #605e5c; }
+.folder-arrow { transition: transform 0.2s; display: inline-block; font-size: 10px; color: #605e5c; }
+.folder-arrow.open { transform: rotate(90deg); }
+.folder-contents { display: none; border-top: 1px solid #f3f2f1; }
+.folder-contents.open { display: block; }
+.folder-contents .doc-row { display: grid; grid-template-columns: 40px 1fr 160px 130px 100px; padding: 10px 16px 10px 56px; border-bottom: 1px solid #f3f2f1; cursor: pointer; transition: background 0.1s; align-items: center; }
+.folder-contents .doc-row:last-child { border-bottom: none; }
+.folder-contents .doc-row:hover { background: #faf0f6; }
+.folder-contents .doc-row .doc-name { color: #7b2d5f; }
+
+/* Lists */
+.list-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.list-card { background: #fff; border: 1px solid #edebe9; border-radius: 8px; padding: 18px; cursor: pointer; transition: all 0.15s; }
+.list-card:hover { border-color: #7b2d5f; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.list-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.list-icon { width: 32px; height: 32px; border-radius: 4px; background: #7b2d5f; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.list-card h4 { font-size: 14px; font-weight: 600; color: #323130; }
+.list-meta { font-size: 12px; color: #a19f9d; margin-bottom: 8px; }
+.list-preview { display: flex; flex-direction: column; gap: 4px; }
+.list-preview-row { font-size: 12px; color: #605e5c; padding: 5px 0; border-bottom: 1px solid #f3f2f1; display: flex; justify-content: space-between; align-items: center; }
+.list-preview-row:last-child { border: none; }
+
+/* Onboarding checklist */
+.onboard-checklist { background: #fff; border: 1px solid #edebe9; border-radius: 8px; padding: 20px; }
+.onboard-title { font-size: 15px; font-weight: 600; color: #323130; margin-bottom: 4px; }
+.onboard-sub { font-size: 12px; color: #a19f9d; margin-bottom: 16px; }
+.onboard-phase { margin-bottom: 16px; }
+.onboard-phase-header { font-size: 13px; font-weight: 600; color: #7b2d5f; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 2px solid #7b2d5f; }
+.onboard-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 13px; color: #605e5c; }
+.onboard-check { width: 20px; height: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+.check-done { background: #dff6dd; color: #107c10; }
+.check-pending { background: #fff4ce; color: #986f0b; }
+.check-na { background: #f3f2f1; color: #a19f9d; border: 1px solid #edebe9; }
+
+/* Training matrix */
+.training-table { width: 100%; background: #fff; border: 1px solid #edebe9; border-radius: 8px; overflow: hidden; border-collapse: collapse; }
+.training-table th { text-align: left; padding: 10px 14px; background: #faf9f8; border-bottom: 1px solid #edebe9; font-size: 11px; font-weight: 600; color: #605e5c; text-transform: uppercase; letter-spacing: 0.3px; }
+.training-table td { padding: 10px 14px; border-bottom: 1px solid #f3f2f1; font-size: 13px; }
+.training-table tr:last-child td { border-bottom: none; }
+.training-table tr:hover td { background: #faf0f6; }
+.training-name { font-weight: 600; color: #323130; }
+.training-req { font-size: 11px; color: #605e5c; }
+
+.sp-footer { max-width: 1340px; margin: 0 auto; padding: 20px 40px 40px; border-top: 1px solid #edebe9; display: flex; justify-content: space-between; }
+.sp-footer-text { font-size: 11px; color: #a19f9d; }
+
+@media (max-width: 1024px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 768px) { .kpi-grid, .list-grid { grid-template-columns: 1fr; } .page-content { padding: 20px; } .folder-header, .folder-contents .doc-row { grid-template-columns: 40px 1fr 120px; } .doc-author, .doc-type { display: none; } .roster-table, .cred-matrix, .training-table { display: block; overflow-x: auto; } }
+</style>
+</head>
+<body>
+<div class="app-rail"><div class="app-rail-icon"><span class="waffle-icon">⊞</span></div><div class="app-rail-divider"></div><div class="app-rail-icon active"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg></div></div>
+<div class="suite-bar"><div class="suite-bar-left"><span class="suite-bar-title">SharePoint</span><div class="suite-search-wrap"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg><input class="suite-search" type="text" placeholder="Search this site..."></div></div><div class="suite-bar-right"><button class="suite-icon-btn"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg></button><div class="user-avatar">B</div></div></div>
+
+<div class="main-wrap">
+  <div class="site-header"><div class="site-header-inner">
+    <img class="site-logo" src="data:image/png;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QBMRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAB9KADAAQAAAABAAAB9AAAAAD/7QA4UGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAAA4QklNBCUAAAAAABDUHYzZjwCyBOmACZjs+EJ+/8AAEQgB9AH0AwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBCBRCkaGxwQkjM1LwFWJy0QoWJDThJfEXGBkaJicoKSo1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/bAEMAAQEBAQEBAgEBAgMCAgIDBAMDAwMEBgQEBAQEBgcGBgYGBgYHBwcHBwcHBwgICAgICAkJCQkJCwsLCwsLCwsLC//bAEMBAgICAwMDBQMDBQsIBggLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLC//dAAQAIP/aAAwDAQACEQMRAD8A/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA//9D/AD/6KKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//0f8AP/ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//S/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA//9P/AD/6KKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//1P8AP/ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//V/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA//9b/AD/6KKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAoo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sF6qK/8Ach/JJN4W8TW5xcaddJxn5oXHH5VlTWd3bnE8Tof9pSP5iv6tb/8A4KT/ALGFi5jbxiJSP+eVjeMPzEGP1rkNQ/4KjfscQAhNWvbv2isJv/agT+ddEOJMwf8AzL5/j/8AIHDV4EySP/M6p/dF/lUPjz/gmH4bPiH9lz4taTGPm1VZbMe+bR1H/oyvwzr+jD4gf8Fc/gFpvhy9t/hvo2rahqbxMtv9ogit7bzCMAuwlZ9o6kBMnpx1r+dBiWJY967sgWKlWxOIxFJwU3FpPyVn+nQ8jjKWX08LgMDgsQqzpRmpSSstZJrq/PqxKKKK+lPggooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//W/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAXJoy1JRQO7Fy1JRRQF2FFFFAgooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD/9f/AD/6KKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//0P8AP/ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//R/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA//9L/AD/6KKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//0/8AP/ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//U/wA/+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA//9X/AD/6KKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//1v8AP/ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP//Z" alt="Cholla">
+    <div class="site-info"><h1>Human Resources</h1><p>Behavioral Health Workforce Management &nbsp;·&nbsp; 9 A.A.C. 10 Staff Requirements &nbsp;·&nbsp; Cholla Behavioral Health IOP</p></div>
+  </div></div>
+
+  <nav class="hub-nav"><a href="#">Home</a><a href="#">Director of Operations</a><a href="#">Clinical</a><a href="#">Admissions</a><a href="#">Marketing</a><a href="#">Business Development</a><a href="#" class="active">Human Resources</a></nav>
+  <nav class="sub-nav">
+    <a href="#" class="active">Dashboard</a>
+    <a href="#roster">Staff Roster</a>
+    <a href="#credentials">Credential Matrix</a>
+    <a href="#training">Training & CEUs</a>
+    <a href="#onboarding">BH Onboarding</a>
+    <a href="#docs">Documents</a>
+    <a href="#lists-section">Lists</a>
+  </nav>
+
+  <div class="page-content">
+    <div class="breadcrumb"><a href="#">Cholla Behavioral Health</a><span class="sep">›</span><a href="#">IOP Operations Hub</a><span class="sep">›</span><a href="#">Administration</a><span class="sep">›</span><span class="current">Human Resources</span></div>
+
+    <!-- Alerts -->
+    <div class="alert-stack">
+      <div class="alert-banner alert-red">
+        <span class="alert-banner-icon">🔴</span>
+        <div class="alert-banner-text"><strong>Credential Alert:</strong> J. Martinez LPC license expires Mar 15 (13 days). S. Thompson CPR card expires Mar 22. R. Davis fingerprint clearance card due Mar 30. Failure to renew may impact AHCCCS billing eligibility.</div>
+        <span class="alert-banner-action">View Credentials →</span>
+      </div>
+      <div class="alert-banner alert-yellow">
+        <span class="alert-banner-icon">⚠️</span>
+        <div class="alert-banner-text"><strong>Training Due:</strong> 4 staff members must complete annual HIPAA training by Mar 15 per 45 CFR §164.530. 2 clinical supervision logs overdue for LAC staff per A.R.S. §32-3301.</div>
+        <span class="alert-banner-action">View Training →</span>
+      </div>
+      <div class="alert-banner alert-blue">
+        <span class="alert-banner-icon">📋</span>
+        <div class="alert-banner-text"><strong>Open Positions:</strong> 1 Licensed Therapist (LPC/LISAC/LCSW) and 1 Administrative Assistant. BHT peer support position approved pending budget sign-off.</div>
+        <span class="alert-banner-action">View Openings →</span>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="section-header"><h2>👥 HR Dashboard – Behavioral Health Workforce</h2><a href="#">Open in Power BI →</a></div>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Total Staff</div>
+        <div class="kpi-value">22</div>
+        <div class="kpi-sub">FT: 18 · PT: 4</div>
+        <span class="kpi-trend neutral">2 open positions</span>
+        <div class="progress-bar-wrap"><div class="progress-label"><span>Staffed</span><span>92%</span></div><div class="progress-bar"><div class="progress-fill fill-purple" style="width:92%"></div></div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Licensed Clinicians</div>
+        <div class="kpi-value">6</div>
+        <div class="kpi-sub">LPC: 2 · LISAC: 2 · LCSW: 1 · LAC: 1</div>
+        <span class="kpi-trend alert">1 license expiring</span>
+        <div class="progress-bar-wrap"><div class="progress-label"><span>All Current</span><span>83%</span></div><div class="progress-bar"><div class="progress-fill fill-orange" style="width:83%"></div></div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Credential Compliance</div>
+        <div class="kpi-value">86%</div>
+        <div class="kpi-sub">19/22 staff fully current</div>
+        <span class="kpi-trend alert">3 items expiring</span>
+        <div class="progress-bar-wrap"><div class="progress-label"><span>Compliant</span><span>86%</span></div><div class="progress-bar"><div class="progress-fill fill-orange" style="width:86%"></div></div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Turnover Rate (Ann.)</div>
+        <div class="kpi-value">12%</div>
+        <div class="kpi-sub">BH industry avg: 22%</div>
+        <span class="kpi-trend up">▲ Well below avg</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Avg Tenure</div>
+        <div class="kpi-value">1.8 yr</div>
+        <div class="kpi-sub">BH industry avg: 1.2 yr</div>
+        <span class="kpi-trend up">▲ Growing</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Training Compliance</div>
+        <div class="kpi-value">88%</div>
+        <div class="kpi-sub">Required BH trainings complete</div>
+        <span class="kpi-trend alert">4 HIPAA overdue</span>
+        <div class="progress-bar-wrap"><div class="progress-label"><span>Complete</span><span>88%</span></div><div class="progress-bar"><div class="progress-fill fill-blue" style="width:88%"></div></div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Fingerprint Clearance</div>
+        <div class="kpi-value">95%</div>
+        <div class="kpi-sub">21/22 current (AZ DPS Level 1)</div>
+        <span class="kpi-trend expiring">1 due Mar 30</span>
+        <div class="progress-bar-wrap"><div class="progress-label"><span>Current</span><span>95%</span></div><div class="progress-bar"><div class="progress-fill fill-green" style="width:95%"></div></div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Clinical Supervision</div>
+        <div class="kpi-value">1</div>
+        <div class="kpi-sub">Staff requiring supervision (LAC)</div>
+        <span class="kpi-trend alert">⚡ Logs overdue</span>
+      </div>
+    </div>
+
+    <!-- Staff Roster -->
+    <div class="section-header" id="roster"><h2>📋 Staff Roster</h2><a href="#">Export to Excel →</a></div>
+    <div class="roster-wrap">
+    <table class="roster-table">
+      <tr><th>Name</th><th>Role</th><th>License / Cert</th><th>Supervisor</th><th>Hire Date</th><th>FPC Status</th><th>CPR</th><th>Status</th></tr>
+      <tr><td class="roster-name">J. Martinez</td><td class="roster-role">Therapist</td><td><span class="license-type lic-lpc">LPC</span></td><td>—</td><td>Jun 2024</td><td><span class="status-badge status-closed">Current</span></td><td><span class="status-badge status-closed">Current</span></td><td><span class="status-badge status-expiring">LPC exp 3/15</span></td></tr>
+      <tr><td class="roster-name">S. Thompson</td><td class="roster-role">Therapist</td><td><span class="license-type lic-lisac">LISAC</span></td><td>—</td><td>Mar 2024</td><td><span class="status-badge status-closed">Current</span></td><td><span class="status-badge status-expiring">Exp 3/22</span></td><td><span class="status-badge status-closed">Active</span></td></tr>
+      <tr><td class="roster-name">R. Davis</td><td class="roster-role">Therapist</td><td><span class="license-type lic-lcsw">LCSW</span></td><td>—</td><td>Aug 2024</td><td><span class="status-badge status-expiring">Exp 3/30</span></td><td><span class="status-badge status-closed">Current</span></td><td><span class="status-badge status-closed">Active</span></td></tr>
+      <tr><td class="roster-name">M. Chen</td><td class="roster-role">Therapist</td><td><span class="license-type lic-lisac">LISAC</span></td><td>—</td><td>Oct 2024</td><td><span class="status-badge status-closed">Current</span></td><td><span class="status-badge status-closed">Current</span></td><td><span class="status-badge status-closed">Active</span></td></tr>
+      <tr><td class="roster-name">K. Patel</td><td class="roster-role">Therapist</td><td><span class="license-type lic-lpc">LPC</span></td><td>—</td><td>Jan 2025</td><td><span class="status-badge status-closed">Current</span></td><td><span class="status-badge status-closed">Current</span></td><td><span class="status-badge status-closed">Active</span></td></tr>
+      <tr><td class="roster-name">A. Nguyen</td><td class="roster-role">Therapist (Assoc.)</td><td><span class="license-type lic-lac">LAC</span></td><td>J. Martinez, LPC</td><td>Jan 2026</td><td><span class="status-badge status-closed">Current</span></td><td><span class="status-badge status-closed">Current</span></td><td><span class="status-badge status-progress">90-Day Probation</span></td></tr>
+      <tr><td class="roster-name">T. Williams</td><td class="roster-role">Admissions Lead</td><td><span class="license-type lic-none">—</span></td><td>—</td><td>May 2024</td><td><span class="status-badge status-closed">Current</span></td><td><span class="status-badge status-closed">Current</span></td><td><span class="status-badge status-closed">Active</span></td></tr>
+      <tr><td class="roster-name">L. Garcia</td><td class="roster-role">Front Office</td><td><span class="license-type lic-none">—</span></td><td>—</td><td>Sep 2024</td><td><span class="status-badge status-closed">Current</span></td><td><span class="status-badge status-closed">Current</span></td><td><span class="status-badge status-closed">Active</span></td></tr>
+      <tr><td class="roster-name">D. Robinson</td><td class="roster-role">Peer Support Specialist</td><td><span class="license-type lic-peer">CPSS</span></td><td>S. Thompson</td><td>Nov 2024</td><td><span class="status-badge status-closed">Current</span></td><td><span class="status-badge status-closed">Current</span></td><td><span class="status-badge status-closed">Active</span></td></tr>
+      <tr><td class="roster-name">M. Jackson</td><td class="roster-role">BHT</td><td><span class="license-type lic-bht">BHT</span></td><td>R. Davis</td><td>Jul 2025</td><td><span class="status-badge status-closed">Current</span></td><td><span class="status-badge status-closed">Current</span></td><td><span class="status-badge status-closed">Active</span></td></tr>
+    </table>
+    </div>
+
+    <!-- Credential Matrix -->
+    <div class="section-header" id="credentials"><h2>🪪 Credential Compliance Matrix</h2><a href="#">Power Automate: Expiration Reminders →</a></div>
+    <div style="overflow-x:auto;">
+    <table class="cred-matrix">
+      <tr><th>Staff Member</th><th>BH License</th><th>AZ DPS FPC<br><span style="font-weight:400;text-transform:none;font-size:10px;">Level 1 Clearance</span></th><th>CPR / First Aid</th><th>HIPAA Training<br><span style="font-weight:400;text-transform:none;font-size:10px;">45 CFR §164.530</span></th><th>FWA Training</th><th>Cultural<br>Competency</th><th>Trauma-<br>Informed Care</th><th>Supervision<br>Log</th><th>CEUs</th></tr>
+      <tr><td>J. Martinez, LPC</td><td><span class="cred-dot cred-expiring">⚠</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-na">—</span></td><td><span class="cred-dot cred-pending">75%</span></td></tr>
+      <tr><td>S. Thompson, LISAC</td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-expiring">⚠</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-na">—</span></td><td><span class="cred-dot cred-current">92%</span></td></tr>
+      <tr><td>R. Davis, LCSW</td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-expiring">⚠</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-expiring">⚠</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-pending">Due</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-na">—</span></td><td><span class="cred-dot cred-current">80%</span></td></tr>
+      <tr><td>M. Chen, LISAC</td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-na">—</span></td><td><span class="cred-dot cred-current">83%</span></td></tr>
+      <tr><td>K. Patel, LPC</td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-na">—</span></td><td><span class="cred-dot cred-current">98%</span></td></tr>
+      <tr><td>A. Nguyen, LAC</td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-expiring">⚠</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-pending">Due</span></td><td><span class="cred-dot cred-pending">Due</span></td><td><span class="cred-dot cred-expiring">⚠</span></td><td><span class="cred-dot cred-pending">40%</span></td></tr>
+      <tr><td>D. Robinson, CPSS</td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-na">—</span></td><td><span class="cred-dot cred-current">✓</span></td></tr>
+      <tr><td>M. Jackson, BHT</td><td><span class="cred-dot cred-na">N/A</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-expiring">⚠</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-current">✓</span></td><td><span class="cred-dot cred-na">N/A</span></td></tr>
+    </table>
+    </div>
+    <div style="margin-top:8px;display:flex;gap:16px;font-size:11px;color:#605e5c;">
+      <span><span class="cred-dot cred-current" style="width:16px;height:16px;font-size:10px;">✓</span> Current</span>
+      <span><span class="cred-dot cred-expiring" style="width:16px;height:16px;font-size:10px;">⚠</span> Expiring / Overdue</span>
+      <span><span class="cred-dot cred-pending" style="width:16px;height:16px;font-size:10px;"></span> Pending / Due</span>
+      <span><span class="cred-dot cred-na" style="width:16px;height:16px;font-size:10px;">—</span> N/A</span>
+    </div>
+
+    <!-- Required BH Training -->
+    <div class="section-header" id="training"><h2>📚 Required Behavioral Health Training</h2><a href="#">Power Automate: Training Reminders →</a></div>
+    <table class="training-table">
+      <tr><th>Training</th><th>Requirement</th><th>Frequency</th><th>Applies To</th><th>Completion</th><th>Status</th></tr>
+      <tr><td class="training-name">HIPAA Privacy & Security</td><td class="training-req">45 CFR §164.530(b)</td><td>Annual</td><td>All Staff</td><td>18/22 (82%)</td><td><span class="status-badge status-expiring">4 Due 3/15</span></td></tr>
+      <tr><td class="training-name">Fraud, Waste & Abuse (FWA)</td><td class="training-req">AHCCCS ACOM 407</td><td>Annual</td><td>All Staff</td><td>22/22 (100%)</td><td><span class="status-badge status-closed">Complete</span></td></tr>
+      <tr><td class="training-name">Cultural Competency</td><td class="training-req">9 A.A.C. 10, Art. 10</td><td>Annual</td><td>All Staff</td><td>20/22 (91%)</td><td><span class="status-badge status-progress">2 In Progress</span></td></tr>
+      <tr><td class="training-name">Trauma-Informed Care</td><td class="training-req">SAMHSA TIP 57</td><td>Annual</td><td>Clinical + BHTs</td><td>7/8 (88%)</td><td><span class="status-badge status-progress">1 New Hire</span></td></tr>
+      <tr><td class="training-name">Suicide Prevention (QPR/SafeTALK)</td><td class="training-req">A.R.S. §36-2907</td><td>Biennial</td><td>Clinical + Admissions</td><td>8/8 (100%)</td><td><span class="status-badge status-closed">Complete</span></td></tr>
+      <tr><td class="training-name">Mandated Reporter Training</td><td class="training-req">A.R.S. §13-3620</td><td>Initial + Annual</td><td>All Staff</td><td>22/22 (100%)</td><td><span class="status-badge status-closed">Complete</span></td></tr>
+      <tr><td class="training-name">CPR / First Aid</td><td class="training-req">9 A.A.C. 10, Art. 7</td><td>Biennial</td><td>All Staff</td><td>19/22 (86%)</td><td><span class="status-badge status-expiring">3 Expiring</span></td></tr>
+      <tr><td class="training-name">De-escalation / CPI</td><td class="training-req">Facility Policy</td><td>Annual</td><td>Clinical + BHTs + Front Office</td><td>14/15 (93%)</td><td><span class="status-badge status-progress">1 Due</span></td></tr>
+      <tr><td class="training-name">Bloodborne Pathogens (BBP)</td><td class="training-req">OSHA 29 CFR 1910.1030</td><td>Annual</td><td>All Staff</td><td>22/22 (100%)</td><td><span class="status-badge status-closed">Complete</span></td></tr>
+      <tr><td class="training-name">Clinical Supervision (LAC/BHT)</td><td class="training-req">A.R.S. §32-3301</td><td>Ongoing (Weekly)</td><td>LAC, BHT, CPSS</td><td>2/3 current</td><td><span class="status-badge status-expiring">1 Log Overdue</span></td></tr>
+    </table>
+
+    <!-- BH Onboarding Checklist -->
+    <div class="section-header" id="onboarding"><h2>🆕 Behavioral Health New Hire Onboarding Checklist</h2><a href="#">Edit Template →</a></div>
+    <div class="onboard-checklist">
+      <div class="onboard-title">A. Nguyen, LAC – Started Jan 13, 2026</div>
+      <div class="onboard-sub">90-Day Probation · Supervised by J. Martinez, LPC · Evaluation Due: Apr 1, 2026</div>
+
+      <div class="onboard-phase">
+        <div class="onboard-phase-header">Phase 1: Pre-Employment (Before Day 1)</div>
+        <div class="onboard-item"><span class="onboard-check check-done">✓</span> AZ DPS Level 1 Fingerprint Clearance Card verified</div>
+        <div class="onboard-item"><span class="onboard-check check-done">✓</span> AZBBHE license verification (LAC active)</div>
+        <div class="onboard-item"><span class="onboard-check check-done">✓</span> Background check complete (no exclusions on OIG/SAM/EPLS)</div>
+        <div class="onboard-item"><span class="onboard-check check-done">✓</span> TB test result on file (within 12 months)</div>
+        <div class="onboard-item"><span class="onboard-check check-done">✓</span> Clinical supervision agreement signed (A.R.S. §32-3301)</div>
+        <div class="onboard-item"><span class="onboard-check check-done">✓</span> Employment offer letter & signed acknowledgments</div>
+        <div class="onboard-item"><span class="onboard-check check-done">✓</span> I-9 / W-4 / Direct deposit</div>
+      </div>
+      <div class="onboard-phase">
+        <div class="onboard-phase-header">Phase 2: Day 1–7 (Orientation)</div>
+        <div class="onboard-item"><span class="onboard-check check-done">✓</span> HIPAA Privacy & Security training</div>
+        <div class="onboard-item"><span class="onboard-check check-done">✓</span> Fraud, Waste & Abuse (FWA) training</div>
+        <div class="onboard-item"><span class="onboard-check check-done">✓</span> Mandated reporter training (A.R.S. §13-3620)</div>
+        <div class="onboard-item"><span class="onboard-check check-done">✓</span> Employee handbook review & signed acknowledgment</div>
+        <div class="onboard-item"><span class="onboard-check check-done">✓</span> EHR system access & documentation standards training</div>
+        <div class="onboard-item"><span class="onboard-check check-done">✓</span> Emergency preparedness orientation & facility tour</div>
+        <div class="onboard-item"><span class="onboard-check check-done">✓</span> Infection control & BBP training (OSHA)</div>
+      </div>
+      <div class="onboard-phase">
+        <div class="onboard-phase-header">Phase 3: Day 8–30 (Clinical Integration)</div>
+        <div class="onboard-item"><span class="onboard-check check-done">✓</span> ASAM criteria & level of care training</div>
+        <div class="onboard-item"><span class="onboard-check check-done">✓</span> Treatment plan standards & AHCCCS documentation requirements</div>
+        <div class="onboard-item"><span class="onboard-check check-done">✓</span> Group facilitation observation (3 sessions min)</div>
+        <div class="onboard-item"><span class="onboard-check check-done">✓</span> Suicide risk assessment protocol (QPR/SafeTALK)</div>
+        <div class="onboard-item"><span class="onboard-check check-pending">◯</span> Cultural competency training (9 A.A.C. 10)</div>
+        <div class="onboard-item"><span class="onboard-check check-pending">◯</span> Trauma-informed care training (SAMHSA TIP 57)</div>
+        <div class="onboard-item"><span class="onboard-check check-done">✓</span> De-escalation / CPI certification</div>
+      </div>
+      <div class="onboard-phase">
+        <div class="onboard-phase-header">Phase 4: Day 31–90 (Supervised Practice)</div>
+        <div class="onboard-item"><span class="onboard-check check-pending">◯</span> Weekly clinical supervision logs current (A.R.S. §32-3301)</div>
+        <div class="onboard-item"><span class="onboard-check check-pending">◯</span> First chart audit passed (peer review)</div>
+        <div class="onboard-item"><span class="onboard-check check-na">—</span> 60-day check-in with supervisor & HR</div>
+        <div class="onboard-item"><span class="onboard-check check-na">—</span> 90-day performance evaluation (due Apr 1)</div>
+        <div class="onboard-item"><span class="onboard-check check-na">—</span> Probation completion decision</div>
+      </div>
+    </div>
+
+    <!-- Document Libraries -->
+    <div class="section-header" id="docs"><h2>📁 HR Document Libraries</h2><a href="#">+ New Document →</a></div>
+    <div class="folder-container">
+      <div class="folder-header" onclick="toggleFolder(this)"><span class="doc-icon">📁</span><span class="doc-name"><span class="folder-arrow">▶</span> Employee Handbook & Policies</span><span class="doc-modified">Feb 15, 2026</span><span class="doc-author">HR</span><span class="doc-type">Folder · 8 items</span></div>
+      <div class="folder-contents">
+        <div class="doc-row"><span class="doc-icon">📄</span><span class="doc-name">Employee Handbook v4.2.pdf</span><span class="doc-modified">Feb 15</span><span class="doc-author">HR Director</span><span class="doc-type">.pdf</span></div>
+        <div class="doc-row"><span class="doc-icon">📄</span><span class="doc-name">Code of Conduct – BH Specific.pdf</span><span class="doc-modified">Jan 10</span><span class="doc-author">HR</span><span class="doc-type">.pdf</span></div>
+        <div class="doc-row"><span class="doc-icon">📄</span><span class="doc-name">PTO & Leave Policy.pdf</span><span class="doc-modified">Jan 05</span><span class="doc-author">HR</span><span class="doc-type">.pdf</span></div>
+        <div class="doc-row"><span class="doc-icon">📄</span><span class="doc-name">Trauma-Informed Workplace Policy.pdf</span><span class="doc-modified">Dec 20</span><span class="doc-author">Clinical/HR</span><span class="doc-type">.pdf</span></div>
+        <div class="doc-row"><span class="doc-icon">📄</span><span class="doc-name">Dual Relationships & Boundary Policy.pdf</span><span class="doc-modified">Dec 15</span><span class="doc-author">Compliance</span><span class="doc-type">.pdf</span></div>
+        <div class="doc-row"><span class="doc-icon">📄</span><span class="doc-name">Staff Wellness & Burnout Prevention Plan.pdf</span><span class="doc-modified">Nov 20</span><span class="doc-author">HR/Clinical</span><span class="doc-type">.pdf</span></div>
+        <div class="doc-row"><span class="doc-icon">📄</span><span class="doc-name">Drug-Free Workplace Policy.pdf</span><span class="doc-modified">Nov 10</span><span class="doc-author">HR</span><span class="doc-type">.pdf</span></div>
+        <div class="doc-row"><span class="doc-icon">📄</span><span class="doc-name">Social Media & Confidentiality Policy.pdf</span><span class="doc-modified">Oct 25</span><span class="doc-author">HR/Compliance</span><span class="doc-type">.pdf</span></div>
+      </div>
+    </div>
+    <div class="folder-container">
+      <div class="folder-header" onclick="toggleFolder(this)"><span class="doc-icon">📁</span><span class="doc-name"><span class="folder-arrow">▶</span> Job Descriptions – BH Roles</span><span class="doc-modified">Feb 20, 2026</span><span class="doc-author">HR</span><span class="doc-type">Folder · 8 items</span></div>
+      <div class="folder-contents">
+        <div class="doc-row"><span class="doc-icon">📄</span><span class="doc-name">Licensed Professional Counselor (LPC).docx</span><span class="doc-modified">Feb 20</span><span class="doc-author">HR</span><span class="doc-type">.docx</span></div>
+        <div class="doc-row"><span class="doc-icon">📄</span><span class="doc-name">Licensed Independent Substance Abuse Counselor (LISAC).docx</span><span class="doc-modified">Feb 18</span><span class="doc-author">HR</span><span class="doc-type">.docx</span></div>
+        <div class="doc-row"><span class="doc-icon">📄</span><span class="doc-name">Licensed Clinical Social Worker (LCSW).docx</span><span class="doc-modified">Feb 15</span><span class="doc-author">HR</span><span class="doc-type">.docx</span></div>
+        <div class="doc-row"><span class="doc-icon">📄</span><span class="doc-name">Licensed Associate Counselor (LAC) – Supervised.docx</span><span class="doc-modified">Feb 12</span><span class="doc-author">HR</span><span class="doc-type">.docx</span></div>
+        <div class="doc-row"><span class="doc-icon">📄</span><span class="doc-name">Behavioral Health Technician (BHT).docx</span><span class="doc-modified">Feb 10</span><span class="doc-author">HR</span><span class="doc-type">.docx</span></div>
+        <div class="doc-row"><span class="doc-icon">📄</span><span class="doc-name">Certified Peer Support Specialist (CPSS).docx</span><span class="doc-modified">Feb 08</span><span class="doc-author">HR</span><span class="doc-type">.docx</span></div>
+        <div class="doc-row"><span class="doc-icon">📄</span><span class="doc-name">Admissions Coordinator.docx</span><span class="doc-modified">Feb 05</span><span class="doc-author">HR</span><span class="doc-type">.docx</span></div>
+        <div class="doc-row"><span class="doc-icon">📄</span><span class="doc-name">Clinical Director.docx</span><span class="doc-modified">Jan 15</span><span class="doc-author">HR</span><span class="doc-type">.docx</span></div>
+      </div>
+    </div>
+    <div class="folder-container">
+      <div class="folder-header" onclick="toggleFolder(this)"><span class="doc-icon">📁</span><span class="doc-name"><span class="folder-arrow">▶</span> Clinical Supervision Records</span><span class="doc-modified">Feb 28, 2026</span><span class="doc-author">Clinical / HR</span><span class="doc-type">Folder · 4 items</span></div>
+      <div class="folder-contents">
+        <div class="doc-row"><span class="doc-icon">📄</span><span class="doc-name">Supervision Agreement Template (A.R.S. §32-3301).docx</span><span class="doc-modified">Jan 10</span><span class="doc-author">Clinical Lead</span><span class="doc-type">.docx</span></div>
+        <div class="doc-row"><span class="doc-icon">📊</span><span class="doc-name">Weekly Supervision Log – A. Nguyen.xlsx</span><span class="doc-modified">Feb 28</span><span class="doc-author">J. Martinez</span><span class="doc-type">.xlsx</span></div>
+        <div class="doc-row"><span class="doc-icon">📊</span><span class="doc-name">Supervision Hours Tracker – All LAC/BHT.xlsx</span><span class="doc-modified">Feb 28</span><span class="doc-author">Clinical Lead</span><span class="doc-type">.xlsx</span></div>
+        <div class="doc-row"><span class="doc-icon">📄</span><span class="doc-name">AZBBHE Supervision Requirements Guide.pdf</span><span class="doc-modified">Nov 20</span><span class="doc-author">Compliance</span><span class="doc-type">.pdf</span></div>
+      </div>
+    </div>
+    <div class="folder-container">
+      <div class="folder-header" onclick="toggleFolder(this)"><span class="doc-icon">📁</span><span class="doc-name"><span class="folder-arrow">▶</span> Performance Reviews & Disciplinary 🔒</span><span class="doc-modified">Feb 22, 2026</span><span class="doc-author">HR</span><span class="doc-type">Restricted</span></div>
+      <div class="folder-contents">
+        <div class="doc-row"><span class="doc-icon">🔒</span><span class="doc-name">Performance Review Template – Clinical.docx</span><span class="doc-modified">Jan 30</span><span class="doc-author">HR</span><span class="doc-type">.docx</span></div>
+        <div class="doc-row"><span class="doc-icon">🔒</span><span class="doc-name">90-Day New Hire Evaluation Form.docx</span><span class="doc-modified">Jan 15</span><span class="doc-author">HR</span><span class="doc-type">.docx</span></div>
+        <div class="doc-row"><span class="doc-icon">🔒</span><span class="doc-name">Corrective Action Form.docx</span><span class="doc-modified">Jan 10</span><span class="doc-author">HR</span><span class="doc-type">.docx</span></div>
+        <div class="doc-row"><span class="doc-icon">🔒</span><span class="doc-name">Termination Checklist – BH Specific.docx</span><span class="doc-modified">Dec 20</span><span class="doc-author">HR / Legal</span><span class="doc-type">.docx</span></div>
+        <div class="doc-row"><span class="doc-icon">🔒</span><span class="doc-name">Exit Interview Template.docx</span><span class="doc-modified">Dec 15</span><span class="doc-author">HR</span><span class="doc-type">.docx</span></div>
+      </div>
+    </div>
+    <div class="folder-container">
+      <div class="folder-header" onclick="toggleFolder(this)"><span class="doc-icon">📁</span><span class="doc-name"><span class="folder-arrow">▶</span> Staff Credential Files 🔒</span><span class="doc-modified">Feb 28, 2026</span><span class="doc-author">HR</span><span class="doc-type">Per-Employee</span></div>
+      <div class="folder-contents">
+        <div class="doc-row"><span class="doc-icon">📁</span><span class="doc-name">Martinez, J. – LPC License, FPC, CPR, CEUs</span><span class="doc-modified">Feb 25</span><span class="doc-author">HR</span><span class="doc-type">Folder</span></div>
+        <div class="doc-row"><span class="doc-icon">📁</span><span class="doc-name">Thompson, S. – LISAC License, FPC, CPR, CEUs</span><span class="doc-modified">Feb 20</span><span class="doc-author">HR</span><span class="doc-type">Folder</span></div>
+        <div class="doc-row"><span class="doc-icon">📁</span><span class="doc-name">Davis, R. – LCSW License, FPC, CPR, CEUs</span><span class="doc-modified">Feb 18</span><span class="doc-author">HR</span><span class="doc-type">Folder</span></div>
+        <div class="doc-row"><span class="doc-icon">📁</span><span class="doc-name">Nguyen, A. – LAC License, FPC, Supervision Docs</span><span class="doc-modified">Feb 28</span><span class="doc-author">HR</span><span class="doc-type">Folder</span></div>
+        <div class="doc-row"><span class="doc-icon">📁</span><span class="doc-name">Robinson, D. – CPSS Cert, FPC, CPR</span><span class="doc-modified">Feb 15</span><span class="doc-author">HR</span><span class="doc-type">Folder</span></div>
+      </div>
+    </div>
+
+    <!-- Lists -->
+    <div class="section-header" id="lists-section"><h2>📋 Lists & Trackers</h2></div>
+    <div class="list-grid">
+      <div class="list-card">
+        <div class="list-card-header"><div class="list-icon">🪪</div><h4>License Expiration Tracker</h4></div>
+        <div class="list-meta">6 clinicians · AZBBHE verified</div>
+        <div class="list-preview">
+          <div class="list-preview-row">J. Martinez · LPC · Exp Mar 15 <span class="status-badge status-expiring">13 Days</span></div>
+          <div class="list-preview-row">M. Chen · LISAC · Exp May 15 <span class="status-badge status-closed">Current</span></div>
+          <div class="list-preview-row">K. Patel · LPC · Exp Sep 30 <span class="status-badge status-closed">Current</span></div>
+          <div class="list-preview-row">A. Nguyen · LAC · Exp Dec 01 <span class="status-badge status-closed">Current</span></div>
+        </div>
+      </div>
+      <div class="list-card">
+        <div class="list-card-header"><div class="list-icon">📅</div><h4>CEU Tracking Log</h4></div>
+        <div class="list-meta">6 clinicians · Annual requirements per AZBBHE</div>
+        <div class="list-preview">
+          <div class="list-preview-row">J. Martinez · 18/24 CEUs (LPC req.) <span class="status-badge status-progress">75%</span></div>
+          <div class="list-preview-row">S. Thompson · 22/24 CEUs <span class="status-badge status-closed">92%</span></div>
+          <div class="list-preview-row">R. Davis · 24/30 CEUs (LCSW req.) <span class="status-badge status-progress">80%</span></div>
+          <div class="list-preview-row">A. Nguyen · 8/20 CEUs (LAC req.) <span class="status-badge status-expiring">40%</span></div>
+        </div>
+      </div>
+      <div class="list-card">
+        <div class="list-card-header"><div class="list-icon">💰</div><h4>Payroll Tracker</h4></div>
+        <div class="list-meta">22 employees · Bi-weekly payroll</div>
+        <div class="list-preview">
+          <div class="list-preview-row">Pay Period: Feb 17–28 <span class="status-badge status-closed">Processed</span></div>
+          <div class="list-preview-row">Total Payroll MTD: $68,400 <span class="status-badge status-purple">On Budget</span></div>
+          <div class="list-preview-row">OT Hours: 13.0 hrs (3 employees) <span class="status-badge status-progress">Flagged</span></div>
+          <div class="list-preview-row">Next Payroll: Mar 14 <span class="status-badge status-pending">Upcoming</span></div>
+        </div>
+      </div>
+      <div class="list-card">
+        <div class="list-card-header"><div class="list-icon">📝</div><h4>Performance Review Schedule</h4></div>
+        <div class="list-meta">2 overdue · 3 upcoming</div>
+        <div class="list-preview">
+          <div class="list-preview-row">A. Nguyen · 90-Day Review · Due Apr 1 <span class="status-badge status-pending">Scheduled</span></div>
+          <div class="list-preview-row">L. Garcia · Annual Review · Overdue <span class="status-badge status-open">Overdue</span></div>
+          <div class="list-preview-row">T. Williams · Annual Review · Overdue <span class="status-badge status-open">Overdue</span></div>
+          <div class="list-preview-row">M. Jackson · 6-Month Check · Due Apr 15 <span class="status-badge status-pending">Upcoming</span></div>
+        </div>
+      </div>
+      <div class="list-card">
+        <div class="list-card-header"><div class="list-icon">🏥</div><h4>Open Positions</h4></div>
+        <div class="list-meta">2 active · 1 pending approval</div>
+        <div class="list-preview">
+          <div class="list-preview-row">Licensed Therapist (LPC/LISAC/LCSW) <span class="status-badge status-purple">Active – 12 applicants</span></div>
+          <div class="list-preview-row">Administrative Assistant <span class="status-badge status-purple">Active – 8 applicants</span></div>
+          <div class="list-preview-row">BHT / Peer Support <span class="status-badge status-pending">Pending Budget</span></div>
+        </div>
+      </div>
+      <div class="list-card">
+        <div class="list-card-header"><div class="list-icon">🛡️</div><h4>Background Check & Exclusion Log</h4></div>
+        <div class="list-meta">All staff verified · OIG/SAM/EPLS screened monthly</div>
+        <div class="list-preview">
+          <div class="list-preview-row">Last OIG/SAM screen: Feb 28, 2026 <span class="status-badge status-closed">0 Exclusions</span></div>
+          <div class="list-preview-row">All FPCs Level 1 verified <span class="status-badge status-closed">22/22</span></div>
+          <div class="list-preview-row">Next monthly screen: Mar 28 <span class="status-badge status-pending">Scheduled</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sp-footer">
+    <span class="sp-footer-text">© 2026 Cholla Behavioral Health · Human Resources · Powered by Microsoft SharePoint</span>
+    <span class="sp-footer-text">9 A.A.C. 10 Compliant · AZBBHE Verified · Restricted Access · HIPAA Secured</span>
+  </div>
+</div>
+<script>function toggleFolder(h){const c=h.nextElementSibling,a=h.querySelector('.folder-arrow');c.classList.toggle('open');a.classList.toggle('open');}</script>
+</body>
+</html>
